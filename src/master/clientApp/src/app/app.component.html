@@ -1,1 +1,12 @@
-<!-- <router-outlet></router-outlet> -->
+<ng-container *ngIf="(connection$ | async) as connection; else loadingTemplate">
+  <mat-toolbar color="primary"><span>MASTER DEVICE REPORTS</span></mat-toolbar>
+  <div class="main-content">
+    <mat-nav-list>
+      <mat-list-item role="listitem" *ngFor="let device of connection.data" (click)="onUpdate(device.Ip)">{{ device.Ip }}</mat-list-item>
+    </mat-nav-list>
+  </div>
+  <mat-toolbar color="{{connection.status=='closed'?'warn':'accent'}}">
+    <span class="text-white">Status : {{ connection.status }}</span>
+  </mat-toolbar>
+</ng-container>
+<ng-template #loadingTemplate>loading ...</ng-template>

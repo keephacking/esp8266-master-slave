@@ -1,20 +1,20 @@
+#ifndef Switch_H
+#define Switch_H
+#include <Arduino.h>
 class Switch
 {
 private:
   int Id;
 
 public:
-  byte Status;
+  int Status;
   String Ip;
+  String Type;
+  uint8_t Wsnum;
   static int Count;
-
-  Switch(){}
-
-  void set(String ip, byte status)
-  {
-    Count++;
-    Id = Count;
-    Ip = ip;
-    Status = status;
-  }
+  void registerDevice(String type, uint8_t wsnum, String ip);
+  String toString();
+  String toJson();
 };
+
+#endif

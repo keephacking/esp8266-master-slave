@@ -4,7 +4,7 @@ var del = require("del");
 
 gulp.task("compress", ["clean"], function() {
   gulp
-    .src(["./dist/**/*.js", "./dist/**/*.html", "./dist/**/*.ico"])
+    .src(["./dist/**/*.css","./dist/**/*.js", "./dist/**/*.html", "./dist/**/*.ico"])
     .pipe(gzip())
     .pipe(gulp.dest("../data"));
 });

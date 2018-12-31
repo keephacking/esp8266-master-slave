@@ -1,25 +1,65 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
+import { BehaviorSubject, ReplaySubject } from "rxjs";
+import { environment } from "src/environments/environment";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"]
 })
 export class AppComponent {
-  constructor(){
-    var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
-    connection.onopen = function () {
-      connection.send('Connect ' + new Date());
+  // connectionSubject:BehaviorSubject<any>=new BehaviorSubject<any>(null);
+  connectionSubject: ReplaySubject<any> = new ReplaySubject<any>(null);
+  connection$ = this.connectionSubject.asObservable();
+  connection;
+  constructor() {
+    const self = this;
+    let host;
+    //if(!environment.production)host="esp.local";
+    if (!environment.production) {
+      host = "192.168.101.42";
+    } else host = location.hostname;
+
+    this.connection = new WebSocket("ws://" + host + ":81/", ["arduino"]);
+    this.connection.onopen = function() {
+      self.connectionSubject.next({ status: "connected" });
+      self.connection.send("register_browser");
     };
-    connection.onerror = function (error) {
-      console.log('WebSocket Error ', error);
+    this.connection.onerror = function(error) {
+      self.connectionSubject.next({ status: "error" });
+      console.log("WebSocket Error ", error);
     };
-    connection.onmessage = function (e) {
-      console.log('Server: ', e.data);
+    this.connection.onmessage = function(e) {
+      console.log(e);
+      console.log(e.data);
+      if (e.data == "refresh") {
+        self.connection.send("register_browser");
+        self.connectionSubject.next({ status: "message", data: [] });
+      } else {
+        try {
+          let data = JSON.parse(e.data);
+          console.log(data);
+          self.connectionSubject.next({ status: "message", data: data });
+        } catch (error) {
+          console.error("Data parsing error");
+          console.log(e.data);
+        }
+      }
+      // let data=JSON.parse(e.data);
+      // console.log('Server data: ', data);
+      // console.log('Server Id: ', data.Id);
+      // console.log('Server Ip: ', data.Ip);
     };
-    connection.onclose = function () {
-      console.log('WebSocket connection closed');
+    this.connection.onclose = function() {
+      self.connectionSubject.next({ status: "closed" });
+      console.log("WebSocket connection closed");
     };
   }
-  
+  onUpdate(ip) {
+    const data = {
+      Ip: ip,
+      Action: "toggle"
+    };
+    this.connection.send(JSON.stringify(data));
+  }
 }
