@@ -14,7 +14,7 @@ class Main
   private:
     static String createSwitchesJsonArray();
     static void unregisterDevice(String ip);
-    static void registerDevice(String type, uint8_t num,String ip);
+    static void registerDevice(String type, uint8_t num,String ip,String macId);
     static void publishSwitchToBrowsers();
 };
 #endif

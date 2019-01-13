@@ -39,7 +39,7 @@ void Main::deviceOn(String ip)
     {
         if (devicesNew[i].Type == "switch" && devicesNew[i].Ip == ip)
         {
-            webSocket.sendTXT(devicesNew[i].Wsnum,"on");
+            webSocket.sendTXT(devicesNew[i].Wsnum, "on");
         }
     }
 }
@@ -50,7 +50,7 @@ void Main::deviceOff(String ip)
     {
         if (devicesNew[i].Type == "switch" && devicesNew[i].Ip == ip)
         {
-            webSocket.sendTXT(devicesNew[i].Wsnum,"off");
+            webSocket.sendTXT(devicesNew[i].Wsnum, "off");
         }
     }
 }
@@ -60,7 +60,7 @@ void Main::toggleDevice(String ip)
     {
         if (devicesNew[i].Type == "switch" && devicesNew[i].Ip == ip)
         {
-            webSocket.sendTXT(devicesNew[i].Wsnum,"toggle");
+            webSocket.sendTXT(devicesNew[i].Wsnum, "toggle");
         }
     }
 }
@@ -78,12 +78,12 @@ void Main::unregisterDevice(String ip)
         }
     }
 }
-void Main::registerDevice(String type, uint8_t num, String ip)
+void Main::registerDevice(String type, uint8_t num, String ip,String macId="")
 {
     Serial.println("On Device Registration .");
     unregisterDevice(ip);
     Switch newDevice;
-    newDevice.registerDevice(type, num, ip);
+    newDevice.registerDevice(type, num, ip,macId);
     devicesNew.push_back(newDevice);
 }
 void Main::publishSwitchToBrowsers()
@@ -103,15 +103,7 @@ void Main::applyDeviceAction(String action, uint8_t num)
 {
     Serial.println("On Websocket : " + action);
     IPAddress ip = webSocket.remoteIP(num);
-    if (action == "register_browser")
-    {
-        registerDevice("browser", num, ip.toString());
-    }
-    else if (action == "register_switch")
-    {
-        registerDevice("switch", num, ip.toString());
-    }
-    else if (action == "unregister")
+    if (action == "unregister")
     {
         unregisterDevice(ip.toString());
     }
@@ -127,7 +119,16 @@ void Main::applyDeviceAction(String action, uint8_t num)
         }
         else
         {
-            if(jsonBody["Action"]=="toggle") toggleDevice(jsonBody["Ip"]);
+            if (jsonBody["Action"] == "toggle")
+                toggleDevice(jsonBody["Ip"]);
+            else if (jsonBody["Action"] == "register_browser")
+            {
+                registerDevice("browser", num, ip.toString());
+            }
+            else if (jsonBody["Action"] == "register_switch")
+            {
+                registerDevice("switch", num, ip.toString(),jsonBody["MacId"]);
+            }
         }
     }
     publishSwitchToBrowsers();

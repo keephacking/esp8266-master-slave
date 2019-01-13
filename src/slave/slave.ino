@@ -31,6 +31,7 @@ struct Switch
     String Ip;
     byte Pin;
     byte Status;
+    String MacId;
 } device;
 
 void init_switch(String ip)
@@ -38,6 +39,7 @@ void init_switch(String ip)
     device.Ip = ip;
     device.Pin = 5;
     device.Status = 0;
+    device.MacId = WiFi.macAddress();
     pinMode(device.Pin, OUTPUT);
 }
 // void register_switch()
@@ -152,7 +154,11 @@ int init_wifi()
     }
     return WiFi.status(); // return the WiFi connection status
 }
-
+void registerSwitch()
+{
+    String message=String("{\"Action\":\"register_switch\"")+",\"MacId\":\""+device.MacId+"\"}";
+    webSocket.sendTXT(message);
+}
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
     switch (type)
@@ -163,9 +169,8 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     case WStype_CONNECTED:
     {
         USE_SERIAL.printf("[WSc] Connected to url: %s\n", payload);
-
         // send message to server when Connected
-        webSocket.sendTXT("register_switch");
+        registerSwitch();
     }
     break;
     case WStype_TEXT:
@@ -174,7 +179,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
         // send message to server
         // webSocket.sendTXT("message here");
         if (String((char *)payload) == "refresh")
-            webSocket.sendTXT("register_switch");
+            registerSwitch();
         else if (String((char *)payload) == "on")
             deviceOn();
         else if (String((char *)payload) == "off")

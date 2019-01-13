@@ -1,12 +1,14 @@
 #include "switch.h"
 #include <Arduino.h>
-void Switch::registerDevice(String type, uint8_t wsnum, String ip)
+
+void Switch::registerDevice(String type, uint8_t wsnum, String ip,String macId)
 {
     Count++;
     Id = Count;
     Type = type;
     Wsnum = wsnum;
     Ip = ip;
+    MacId = macId;
 }
 
 String Switch::toString()

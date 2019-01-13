@@ -10,9 +10,10 @@ public:
   int Status;
   String Ip;
   String Type;
+  String MacId;
   uint8_t Wsnum;
   static int Count;
-  void registerDevice(String type, uint8_t wsnum, String ip);
+  void registerDevice(String type, uint8_t wsnum, String ip,String macId);
   String toString();
   String toJson();
 };

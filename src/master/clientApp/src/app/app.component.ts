@@ -17,13 +17,13 @@ export class AppComponent {
     let host;
     //if(!environment.production)host="esp.local";
     if (!environment.production) {
-      host = "192.168.101.42";
+      host = "192.168.101.46";
     } else host = location.hostname;
 
     this.connection = new WebSocket("ws://" + host + ":81/", ["arduino"]);
     this.connection.onopen = function() {
       self.connectionSubject.next({ status: "connected" });
-      self.connection.send("register_browser");
+      self.register();
     };
     this.connection.onerror = function(error) {
       self.connectionSubject.next({ status: "error" });
@@ -33,7 +33,7 @@ export class AppComponent {
       console.log(e);
       console.log(e.data);
       if (e.data == "refresh") {
-        self.connection.send("register_browser");
+        self.register();
         self.connectionSubject.next({ status: "message", data: [] });
       } else {
         try {
@@ -54,6 +54,10 @@ export class AppComponent {
       self.connectionSubject.next({ status: "closed" });
       console.log("WebSocket connection closed");
     };
+  }
+  register(){
+    const data={Action:"register_browser"};
+    this.connection.send(JSON.stringify(data));
   }
   onUpdate(ip) {
     const data = {
